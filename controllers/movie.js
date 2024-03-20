@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 export const newMovie = async (req, res, next) => {
   try {
     const {title, show_date, start_time, end_time, total_seats} = req.body;
-    if (process.env.admin_object_id==jwt.verify(req.cookies.token,process.env.JWT_SECRET)._id){
+    if (req.user.email=="admin"){
       await MovieAll.create({
         title: title,
         show_date: show_date,
@@ -35,7 +35,7 @@ export const newMovie = async (req, res, next) => {
 export const bookMovie = async (req, res, next) => {
   try {
     const {title, show_date, start_time, end_time, seats_sold} = req.body;
-    if (process.env.admin_object_id!=jwt.verify(req.cookies.token,process.env.JWT_SECRET)._id && (seats_sold>=1 && seats_sold<=4)){
+    if (req.user.email!="admin" && (seats_sold>=1 && seats_sold<=4)){
       await Movie.create({
         title: title,
         show_date: show_date,
@@ -117,7 +117,7 @@ export const searchMovie = async (req, res, next) => {
 export const removeMovie = async (req, res, next) => {
   try {
     const {title, show_date, start_time, end_time} = req.body;
-    if (process.env.admin_object_id==jwt.verify(req.cookies.token,process.env.JWT_SECRET)._id){
+    if (req.user.email=="admin"){
       const movie = await MovieAll.findOne(req.body);
       if (!movie) return next(new ErrorHandler("Movie not found", 404));
       if (movie.total_seats!=movie.remaining_seats) return next(new ErrorHandler("Cannot be deleted", 404));
@@ -142,7 +142,7 @@ export const cancelMovie = async (req, res, next) => {
   try {
     let query ={};
     const {title, show_date, start_time, end_time, seats_sold} = req.body;
-    if (process.env.admin_object_id!=jwt.verify(req.cookies.token,process.env.JWT_SECRET)._id){
+    if (req.user.email!="admin"){
       query={title:title, 
         show_date:show_date, 
         start_time: 
